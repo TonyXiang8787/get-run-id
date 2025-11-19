@@ -15,19 +15,28 @@ jobs:
         uses: ./
         with:
           workflow_name: "Example Workflow"
-          # sha is optional, will use current commit by default
       
       - name: Display run ID
         run: |
           echo "Found run ID: ${{ steps.get_run_id.outputs.run_id }}"
-          
-      - name: Test with explicit SHA
-        id: get_run_id_with_sha
-        uses: ./
-        with:
-          workflow_name: "Example Workflow"
-          sha: ${{ github.sha }}
       
-      - name: Display run ID with SHA
+      - name: Download artifact from found run
+        uses: actions/download-artifact@v4
+        with:
+          name: run-id-artifact
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ steps.get_run_id.outputs.run_id }}
+      
+      - name: Compare run IDs
         run: |
-          echo "Found run ID with SHA: ${{ steps.get_run_id_with_sha.outputs.run_id }}"
+          ARTIFACT_RUN_ID=$(cat run-id.txt)
+          ACTION_RUN_ID="${{ steps.get_run_id.outputs.run_id }}"
+          echo "Run ID from action: $ACTION_RUN_ID"
+          echo "Run ID from artifact: $ARTIFACT_RUN_ID"
+          
+          if [ "$ARTIFACT_RUN_ID" = "$ACTION_RUN_ID" ]; then
+            echo "SUCCESS: Run IDs match!"
+          else
+            echo "FAILURE: Run IDs do not match!"
+            exit 1
+          fi
