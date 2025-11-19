@@ -1,0 +1,11 @@
+name: "Example Workflow"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  example:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Example step
+        run: echo "This is an example workflow to search for"

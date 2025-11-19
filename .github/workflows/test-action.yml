@@ -1,0 +1,33 @@
+name: "Test Get Run ID"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Test get-run-id action
+        id: get_run_id
+        uses: ./
+        with:
+          workflow_name: "Example Workflow"
+          # sha is optional, will use current commit by default
+      
+      - name: Display run ID
+        run: |
+          echo "Found run ID: ${{ steps.get_run_id.outputs.run_id }}"
+          
+      - name: Test with explicit SHA
+        id: get_run_id_with_sha
+        uses: ./
+        with:
+          workflow_name: "Example Workflow"
+          sha: ${{ github.sha }}
+      
+      - name: Display run ID with SHA
+        run: |
+          echo "Found run ID with SHA: ${{ steps.get_run_id_with_sha.outputs.run_id }}"
