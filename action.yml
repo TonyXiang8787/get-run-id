@@ -25,7 +25,7 @@ runs:
           const sha = process.env.SHA || context.sha;
           const { data } = await github.rest.actions.listRepoWorkflows({
             owner: context.repo.owner,
-            repo: context.repo.name,
+            repo: context.repo.repo,
           });
           const workflow = data.workflows.find(w => w.name === workflowName);
           if (!workflow) {
@@ -34,7 +34,7 @@ runs:
           }
           const { data: runs } = await github.rest.actions.listWorkflowRuns({
             owner: context.repo.owner,
-            repo: context.repo.name,
+            repo: context.repo.repo,
             workflow_id: workflow.id,
             head_sha: sha,
             status: 'success',
