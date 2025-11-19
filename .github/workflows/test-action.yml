@@ -14,7 +14,7 @@ jobs:
         id: get_run_id
         uses: ./
         with:
-          workflow_name: "Example Workflow"
+          workflow_name: "Example Workflow Implementation"
       
       - name: Display run ID
         run: |

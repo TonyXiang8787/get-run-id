@@ -4,17 +4,5 @@ on:
   workflow_dispatch:
 
 jobs:
-  example:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Example step
-        run: echo "This is an example workflow to search for"
-      
-      - name: Save run ID to file
-        run: echo "${{ github.run_id }}" > run-id.txt
-      
-      - name: Upload run ID artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: run-id-artifact
-          path: run-id.txt
+  call-implementation:
+    uses: ./.github/workflows/example-workflow-impl.yml
