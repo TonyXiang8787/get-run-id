@@ -1,0 +1,51 @@
+name: "Find Workflow Run ID"
+description: "Finds the run-id of a workflow by workflow name and commit SHA."
+inputs:
+  workflow_name:
+    description: "Name of the workflow to search for (case-sensitive)"
+    required: true
+    type: string
+  sha:
+    description: "Commit SHA (defaults to github.sha)"
+    required: false
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+    - name: Find run-id for workflow and commit
+      id: find_run
+      uses: actions/github-script@v7
+      env:
+        WORKFLOW_NAME: ${{ inputs.workflow_name }}
+        SHA: ${{ inputs.sha }}
+      with:
+        script: |
+          const workflowName = process.env.WORKFLOW_NAME;
+          const sha = process.env.SHA || context.sha;
+          const { data } = await github.rest.actions.listRepoWorkflows({
+            owner: context.repo.owner,
+            repo: context.repo.name,
+          });
+          const workflow = data.workflows.find(w => w.name === workflowName);
+          if (!workflow) {
+            core.setFailed(`Workflow "${workflowName}" not found.`);
+            return;
+          }
+          const { data: runs } = await github.rest.actions.listWorkflowRuns({
+            owner: context.repo.owner,
+            repo: context.repo.name,
+            workflow_id: workflow.id,
+            head_sha: sha,
+            status: 'success',
+          });
+          if (!runs.workflow_runs.length) {
+            core.setFailed(`No successful run found for workflow "${workflowName}" on SHA ${sha}`);
+            return;
+          }
+          core.setOutput('run_id', runs.workflow_runs[0].id);
+
+outputs:
+  run_id:
+    description: "The run-id for the successful workflow run matching name and SHA"
+    value: ${{ steps.find_run.outputs.run_id }}
